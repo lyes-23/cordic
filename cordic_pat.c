@@ -5,32 +5,32 @@
 #include "alloca.h"
 #include "mut.h"
 
-// Constante générales
+// Constante gï¿½nï¿½rales
 const PERIOD=2;
 
 //--------------------------------------------------------------------------------------------------
-// rend la date du cycle n°i ou du cycle n°i + 1 demi-cycle 
+// rend la date du cycle nï¿½i ou du cycle nï¿½i + 1 demi-cycle 
 //--------------------------------------------------------------------------------------------------
 #define cycle(i)        inttostr(i*PERIOD)
 #define next_cycle(i)   inttostr(i*PERIOD + PERIOD/2)
 #define out_cycle(i)    inttostr(i*PERIOD - PERIOD/2)
 
 //--------------------------------------------------------------------------------------------------
-// Fabriquer une chaine de caractères à partir d'un entier
+// Fabriquer une chaine de caractï¿½res ï¿½ partir d'un entier
 //
-// namealloc fait l'équivalent de strdup() mais en plus il teste que la chaine 
-//           en paramètre n'a pas déjà été allouée, si oui, namealloc rend
-//           le pointeur sur la chaine déjà allouée, cette opération utilise
+// namealloc fait l'ï¿½quivalent de strdup() mais en plus il teste que la chaine 
+//           en paramï¿½tre n'a pas dï¿½jï¿½ ï¿½tï¿½ allouï¿½e, si oui, namealloc rend
+//           le pointeur sur la chaine dï¿½jï¿½ allouï¿½e, cette opï¿½ration utilise
 //           un dictionnaire (table de hachage)
 //
 // inttostr(42)         rend un pointeur sur "42"
-// inttostr(42)         rend LE MÊME pointeur sur "42"
+// inttostr(42)         rend LE Mï¿½ME pointeur sur "42"
 // inttostrx(0x42,4)    rend "0x0042"
 // inttostrx(0x42,1)    rend "0x2"
 // inttostrx(0x42,8)    rend "0x00000042"
 //--------------------------------------------------------------------------------------------------
 static inline char *inttostr(int entier)
-{
+{name
     char *str = (char *) alloca(32 * sizeof(char)); // allocation dans la pile
     sprintf(str, "%d", entier);
     return namealloc(str);  // utilise un dictionnaire
@@ -198,7 +198,7 @@ void cordic_seq (
     assert ((Get + Norm + Calc + Mkc + Place + Put) < 2); // FSM orthogonal
 }
 
-// description procédurale des stimuli
+// description procï¿½durale des stimuli
 main()
 {
     int c=0;
@@ -301,7 +301,7 @@ main()
     }
 
     printf("Number of cycles : %d\n",nb_cycle);
-    // la génération du signal d'horloge
+    // la gï¿½nï¿½ration du signal d'horloge
     for (c = 0; c <= nb_cycle; c++) {
        AFFECT(cycle(c),         "ck", inttostr(0));
        AFFECT(next_cycle(c),    "ck", inttostr(1));

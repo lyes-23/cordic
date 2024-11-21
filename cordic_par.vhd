@@ -17,61 +17,60 @@ end cordic_par;
 
 ARCHITECTURE vhd OF cordic_par IS 
 
-    SIGNAL n_send, send, comp, n_wait0, wait0: std_logic;
-    SIGNAL counter,n_counter : std_logic_vector(2 downto 0);
+    SIGNAL comp   : std_logic;
     signal i, n_i : std_logic_vector(2 downto 0);
+    signal n_a_p,n_x_p,n_y_p : std_logic_vector(7 downto 0);
 
 begin 
 
-comp <= '1' when counter = "111" else
+comp <= '1' when i = "111" else
         '0';
   
 update_counter: process(ck)
 begin 
-if ((ck = '1') AND NOT(ck'STABLE) ) then 
-    i <= n_i;
-end if; 
+    if ((ck = '1') AND NOT(ck'STABLE) ) then 
+        i <= n_i;
+        a_p<= n_a_p;
+        x_p<= n_x_p;
+        y_p<= n_y_p;
+    end if; 
 end process update_counter; 
 
 
-n_i <= i+1     when wr_axy_p and not i="111" else
-       "000"   when i="111" 
+    n_i <= i+1     when wr_axy_p 
     else "000" ;
 
-wok_axy_p <= '1' when i = "111"
-                 else '0'; 
+    wok_axy_p <= '1' when i = "111"
+    else '0'; 
 
     
 
-    a_p(0) <= a when i = "000" else '0';
-    a_p(1) <= a when i = "001" else '0';
-    a_p(2) <= a when i = "010" else '0';
-    a_p(3) <= a when i = "011" else '0';
-    a_p(4) <= a when i = "100" else '0';
-    a_p(5) <= a when i = "101" else '0';
-    a_p(6) <= a when i = "110" else '0';
-    a_p(7) <= a when i = "111" else '0';
+    n_a_p(0) <= a when i = "000" else '0';
+    n_a_p(1) <= a when i = "001" else '0';
+    n_a_p(2) <= a when i = "010" else '0';
+    n_a_p(3) <= a when i = "011" else '0';
+    n_a_p(4) <= a when i = "100" else '0';
+    n_a_p(5) <= a when i = "101" else '0';
+    n_a_p(6) <= a when i = "110" else '0';
+    n_a_p(7) <= a when i = "111" else '0';
 
-    x_p(0) <= x when i = "000" else '0';
-    x_p(1) <= x when i = "001" else '0';
-    x_p(2) <= x when i = "010" else '0';
-    x_p(3) <= x when i = "011" else '0';
-    x_p(4) <= x when i = "100" else '0';
-    x_p(5) <= x when i = "101" else '0';
-    x_p(6) <= x when i = "110" else '0';
-    x_p(7) <= x when i = "111" else '0';
+    n_x_p(0) <= x when i = "000" else '0';
+    n_x_p(1) <= x when i = "001" else '0';
+    n_x_p(2) <= x when i = "010" else '0';
+    n_x_p(3) <= x when i = "011" else '0';
+    n_x_p(4) <= x when i = "100" else '0';
+    n_x_p(5) <= x when i = "101" else '0';
+    n_x_p(6) <= x when i = "110" else '0';
+    n_x_p(7) <= x when i = "111" else '0';
 
-    y_p(0) <= y when i = "000" else '0';
-    y_p(1) <= y when i = "001" else '0';
-    y_p(2) <= y when i = "010" else '0';
-    y_p(3) <= y when i = "011" else '0';
-    y_p(4) <= y when i = "100" else '0';
-    y_p(5) <= y when i = "101" else '0';
-    y_p(6) <= y when i = "110" else '0';
-    y_p(7) <= y when i = "111" else '0';
-
-
-              
+    n_y_p(0) <= y when i = "000" else '0';
+    n_y_p(1) <= y when i = "001" else '0';
+    n_y_p(2) <= y when i = "010" else '0';
+    n_y_p(3) <= y when i = "011" else '0';
+    n_y_p(4) <= y when i = "100" else '0';
+    n_y_p(5) <= y when i = "101" else '0';
+    n_y_p(6) <= y when i = "110" else '0';
+    n_y_p(7) <= y when i = "111" else '0';
 
 
 
