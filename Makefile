@@ -46,6 +46,16 @@ valid_net:
 	export PATNAME=$(MODEL)_net; genpat $(MODEL)_pat
 	asimut $(MODEL)_net $(MODEL)_net $(MODEL)_net_res
 
+valid_cordic_par: 
+	vasy -a -I vhd -p -o $(MODEL)_par $(MODEL)_par_v 
+	export PATNAME=$(MODEL)_par DECSIG; genpat $(MODEL)_par_pat
+	asimut -b $(MODEL)_par $(MODEL)_par $(MODEL)_par_res
+
+
+simul_gpat_par: vasy ## Simule un jeu de patterns générés
+	export MODEL=$(MODEL) CYCLES=50 TYPE=BEH; genpat patterns/$(MODEL)
+	$(ASIM) -b $(MODEL)_v $(MODEL)_gen $(MODEL)_gres
+	@if [[ "$(VERBOSE)" == "1" ]]; then $(XPAT) -l $(MODEL)_gres; fi
 
 clean:
 	rm  *.dat *~ cercle Makefile.*\
