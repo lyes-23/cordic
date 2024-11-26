@@ -29,26 +29,32 @@ entity cordic_par is
     begin 
     if ((ck = '1') AND NOT(ck'STABLE) ) then 
         if(nreset = '1' or not(wr_axy_p)) then 
-            i <= "0";
+            i <= "000";
+            tmp_a_p <= (others => '0');
+            tmp_x_p <= (others => '0');
+            tmp_y_p <= (others => '0');
+            
         else
-            i <= n_i;
             tmp_a_p<= n_a_p;
             tmp_x_p<= n_x_p;
             tmp_y_p<= n_y_p;
             wok_axy_p <= n_wok_axy_p;
+            i <= n_i;
         end if; 
     end if;
     end process update_counter; 
     
-
     n_i <= i + 1 when wr_axy_p else "000";
-    n_wok_axy_p <= '1'   when   i = "111" else '0';
-    n_a_p<= tmp_a_p(6 downto 0) & a when i < "111" else tmp_a_p;
-    n_x_p<= tmp_x_p(6 downto 0) & x when i < "111" else tmp_x_p;
-    n_y_p<= tmp_y_p(6 downto 0) & y when i < "111" else tmp_y_p;
-    a_p         <= tmp_a_p when i = "111" else "00000000";
-    x_p         <= tmp_x_p when i = "111" else "00000000";
-    y_p         <= tmp_y_p when i = "111" else "00000000";
+    n_wok_axy_p <= '1'   when   n_i = "111" else '0';
+
+    n_a_p<= tmp_a_p(6 downto 0) & a when i <= "111" else tmp_a_p;
+    n_x_p<= tmp_x_p(6 downto 0) & x when i <= "111" else tmp_x_p;
+    n_y_p<= tmp_y_p(6 downto 0) & y when i <= "111" else tmp_y_p;
+
+    a_p         <= tmp_a_p ;
+    x_p         <= tmp_x_p ;
+    y_p         <= tmp_y_p ;
+
     
     END vhd;
     
