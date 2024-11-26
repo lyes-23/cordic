@@ -20,167 +20,97 @@ END cordic_par;
 
 ARCHITECTURE VBE OF cordic_par IS
 
-  SIGNAL rtlalc_4	: REG_VECTOR(7 DOWNTO 0) REGISTER;
-  SIGNAL rtlalc_3	: REG_VECTOR(7 DOWNTO 0) REGISTER;
-  SIGNAL rtlalc_2	: REG_VECTOR(7 DOWNTO 0) REGISTER;
-  SIGNAL rtlalc_1	: REG_BIT REGISTER;
-  SIGNAL rtlsum_0	: BIT_VECTOR(2 DOWNTO 0);
-  SIGNAL rtlcarry_0	: BIT_VECTOR(2 DOWNTO 0);
-  SIGNAL rtldef_4	: BIT;
+  SIGNAL rtlalc_7	: REG_BIT REGISTER;
+  SIGNAL rtlsum_6	: BIT_VECTOR(2 DOWNTO 0);
+  SIGNAL rtlcarry_6	: BIT_VECTOR(2 DOWNTO 0);
+  SIGNAL rtlltgt_5	: BIT;
+  SIGNAL rtlcarry_5	: BIT_VECTOR(3 DOWNTO 0);
+  SIGNAL alcexts_4	: BIT_VECTOR(3 DOWNTO 0);
+  SIGNAL rtlltgt_3	: BIT;
+  SIGNAL rtlcarry_3	: BIT_VECTOR(3 DOWNTO 0);
+  SIGNAL alcexts_2	: BIT_VECTOR(3 DOWNTO 0);
+  SIGNAL rtlltgt_1	: BIT;
+  SIGNAL rtlcarry_1	: BIT_VECTOR(3 DOWNTO 0);
+  SIGNAL alcexts_0	: BIT_VECTOR(3 DOWNTO 0);
   SIGNAL rtldef_3	: BIT;
   SIGNAL rtldef_2	: BIT;
   SIGNAL rtldef_1	: BIT;
   SIGNAL rtldef_0	: BIT;
   SIGNAL i	: REG_VECTOR(2 DOWNTO 0) REGISTER;
   SIGNAL n_i	: BIT_VECTOR(2 DOWNTO 0);
-  SIGNAL n_a_p	: REG_VECTOR(7 DOWNTO 0) REGISTER;
-  SIGNAL n_x_p	: REG_VECTOR(7 DOWNTO 0) REGISTER;
-  SIGNAL n_y_p	: REG_VECTOR(7 DOWNTO 0) REGISTER;
+  SIGNAL n_a_p	: BIT_VECTOR(7 DOWNTO 0);
+  SIGNAL n_x_p	: BIT_VECTOR(7 DOWNTO 0);
+  SIGNAL n_y_p	: BIT_VECTOR(7 DOWNTO 0);
+  SIGNAL tmp_a_p	: REG_VECTOR(7 DOWNTO 0) REGISTER;
+  SIGNAL tmp_x_p	: REG_VECTOR(7 DOWNTO 0) REGISTER;
+  SIGNAL tmp_y_p	: REG_VECTOR(7 DOWNTO 0) REGISTER;
   SIGNAL n_wok_axy_p	: BIT;
-  SIGNAL update_counter_def_2	: BIT;
+  SIGNAL update_counter_def_5	: BIT;
 BEGIN
 
-  a_p <= rtlalc_4;
-  x_p <= rtlalc_3;
-  y_p <= rtlalc_2;
-  wok_axy_p <= rtlalc_1;
-  rtlcarry_0(0) <= '0';
-  rtlsum_0 <= ((i XOR "001") XOR rtlcarry_0);
-  rtlcarry_0(2 downto 1) <= (((i(1 downto 0) AND "01") OR (i(1 downto 0) AND rtlcarry_0(1 downto 0))) OR ("01"
- AND rtlcarry_0(1 downto 0)));
-  n_wok_axy_p <= '1' WHEN (i = "111") ELSE
+  wok_axy_p <= rtlalc_7;
+  rtlcarry_6(0) <= '0';
+  rtlsum_6 <= ((i XOR "001") XOR rtlcarry_6);
+  rtlcarry_6(2 downto 1) <= (((i(1 downto 0) AND "01") OR (i(1 downto 0) AND rtlcarry_6(1 downto 0))) OR ("01"
+ AND rtlcarry_6(1 downto 0)));
+  rtlcarry_5(0) <= '1';
+  rtlcarry_5(3 downto 1) <= ((NOT(alcexts_4(2 downto 0)) OR rtlcarry_5(2 downto 0)) OR (NOT(alcexts_4(2 downto 0)
+) AND rtlcarry_5(2 downto 0)));
+  rtlltgt_5 <= NOT((NOT(alcexts_4(3)) XOR rtlcarry_5(3)));
+  alcexts_4 <= ('0' & i);
+  rtlcarry_3(0) <= '1';
+  rtlcarry_3(3 downto 1) <= ((NOT(alcexts_2(2 downto 0)) OR rtlcarry_3(2 downto 0)) OR (NOT(alcexts_2(2 downto 0)
+) AND rtlcarry_3(2 downto 0)));
+  rtlltgt_3 <= NOT((NOT(alcexts_2(3)) XOR rtlcarry_3(3)));
+  alcexts_2 <= ('0' & i);
+  rtlcarry_1(0) <= '1';
+  rtlcarry_1(3 downto 1) <= ((NOT(alcexts_0(2 downto 0)) OR rtlcarry_1(2 downto 0)) OR (NOT(alcexts_0(2 downto 0)
+) AND rtlcarry_1(2 downto 0)));
+  rtlltgt_1 <= NOT((NOT(alcexts_0(3)) XOR rtlcarry_1(3)));
+  alcexts_0 <= ('0' & i);
+  y_p <= tmp_y_p;
+  x_p <= tmp_x_p;
+  a_p <= tmp_a_p;
+  n_y_p <= (tmp_y_p(6 downto 0) & y) WHEN rtlltgt_1 ELSE
+     tmp_y_p;
+  n_x_p <= (tmp_x_p(6 downto 0) & x) WHEN rtlltgt_3 ELSE
+     tmp_x_p;
+  n_a_p <= (tmp_a_p(6 downto 0) & a) WHEN rtlltgt_5 ELSE
+     tmp_a_p;
+  n_wok_axy_p <= '1' WHEN (n_i = "111") ELSE
      '0';
-  n_i <= rtlsum_0 WHEN wr_axy_p ELSE
+  n_i <= rtlsum_6 WHEN wr_axy_p ELSE
      "000";
   LABEL0 : BLOCK  ((ck = '1') AND NOT(ck'STABLE) )
   BEGIN
-    rtlalc_1 <= GUARDED n_wok_axy_p WHEN NOT(nreset) ELSE rtlalc_1;
+    i <= GUARDED ((rtldef_3 & rtldef_3 & rtldef_3) AND n_i);
   END BLOCK LABEL0;
   LABEL1 : BLOCK  ((ck = '1') AND NOT(ck'STABLE) )
   BEGIN
-    rtlalc_2 <= GUARDED ((rtldef_4 & rtldef_4 & rtldef_4 & rtldef_4 & rtldef_4 & rtldef_4 & rtldef_4 & rtldef_4
-) AND n_y_p);
+    rtlalc_7 <= GUARDED n_wok_axy_p WHEN (wr_axy_p AND NOT(nreset)) ELSE rtlalc_7;
   END BLOCK LABEL1;
   LABEL2 : BLOCK  ((ck = '1') AND NOT(ck'STABLE) )
   BEGIN
-    rtlalc_3 <= GUARDED ((rtldef_3 & rtldef_3 & rtldef_3 & rtldef_3 & rtldef_3 & rtldef_3 & rtldef_3 & rtldef_3
-) AND n_x_p);
+    tmp_y_p <= GUARDED ((rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2
+) AND n_y_p);
   END BLOCK LABEL2;
   LABEL3 : BLOCK  ((ck = '1') AND NOT(ck'STABLE) )
   BEGIN
-    rtlalc_4 <= GUARDED ((rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2 & rtldef_2
-) AND n_a_p);
+    tmp_x_p <= GUARDED ((rtldef_1 & rtldef_1 & rtldef_1 & rtldef_1 & rtldef_1 & rtldef_1 & rtldef_1 & rtldef_1
+) AND n_x_p);
   END BLOCK LABEL3;
   LABEL4 : BLOCK  ((ck = '1') AND NOT(ck'STABLE) )
   BEGIN
-    i <= GUARDED (((rtldef_0 & rtldef_0 & rtldef_0) AND n_i) OR ((rtldef_1 & rtldef_1 & rtldef_1
-) AND "000"));
+    tmp_a_p <= GUARDED ((rtldef_0 & rtldef_0 & rtldef_0 & rtldef_0 & rtldef_0 & rtldef_0 & rtldef_0 & rtldef_0
+) AND n_a_p);
   END BLOCK LABEL4;
-  rtldef_4 <= '1' WHEN NOT(update_counter_def_2) ELSE
+  rtldef_3 <= '1' WHEN NOT(update_counter_def_5) ELSE
      '0';
-  rtldef_3 <= '1' WHEN NOT(update_counter_def_2) ELSE
+  rtldef_2 <= '1' WHEN NOT(update_counter_def_5) ELSE
      '0';
-  rtldef_2 <= '1' WHEN NOT(update_counter_def_2) ELSE
+  rtldef_1 <= '1' WHEN NOT(update_counter_def_5) ELSE
      '0';
-  rtldef_1 <= '1' WHEN update_counter_def_2 ELSE
+  rtldef_0 <= '1' WHEN NOT(update_counter_def_5) ELSE
      '0';
-  rtldef_0 <= '1' WHEN NOT(update_counter_def_2) ELSE
-     '0';
-  update_counter_def_2 <= (nreset = '1');
-  LABEL5 : BLOCK ((wr_axy_p AND i(2) AND i(1) AND i(0)) = '1')
-  BEGIN
-    n_y_p(7) <= GUARDED y;
-  END BLOCK LABEL5;
-  LABEL6 : BLOCK ((wr_axy_p AND i(2) AND i(1) AND NOT(i(0))) = '1')
-  BEGIN
-    n_y_p(6) <= GUARDED n_y_p(5);
-  END BLOCK LABEL6;
-  LABEL7 : BLOCK ((wr_axy_p AND i(2) AND NOT(i(1)) AND i(0)) = '1')
-  BEGIN
-    n_y_p(5) <= GUARDED n_y_p(4);
-  END BLOCK LABEL7;
-  LABEL8 : BLOCK ((wr_axy_p AND i(2) AND NOT(i(1)) AND NOT(i(0))) = '1')
-  BEGIN
-    n_y_p(4) <= GUARDED n_y_p(3);
-  END BLOCK LABEL8;
-  LABEL9 : BLOCK ((wr_axy_p AND NOT(i(2)) AND i(1) AND i(0)) = '1')
-  BEGIN
-    n_y_p(3) <= GUARDED n_y_p(2);
-  END BLOCK LABEL9;
-  LABEL10 : BLOCK ((wr_axy_p AND NOT(i(2)) AND i(1) AND NOT(i(0))) = '1')
-  BEGIN
-    n_y_p(2) <= GUARDED n_y_p(1);
-  END BLOCK LABEL10;
-  LABEL11 : BLOCK ((wr_axy_p AND NOT(i(2)) AND NOT(i(1)) AND i(0)) = '1')
-  BEGIN
-    n_y_p(1) <= GUARDED n_y_p(0);
-  END BLOCK LABEL11;
-  LABEL12 : BLOCK ((wr_axy_p AND NOT(i(2)) AND NOT(i(1)) AND NOT(i(0))) = '1')
-  BEGIN
-    n_y_p(0) <= GUARDED y;
-  END BLOCK LABEL12;
-  LABEL13 : BLOCK ((wr_axy_p AND i(2) AND i(1) AND i(0)) = '1')
-  BEGIN
-    n_x_p(7) <= GUARDED x;
-  END BLOCK LABEL13;
-  LABEL14 : BLOCK ((wr_axy_p AND i(2) AND i(1) AND NOT(i(0))) = '1')
-  BEGIN
-    n_x_p(6) <= GUARDED n_x_p(5);
-  END BLOCK LABEL14;
-  LABEL15 : BLOCK ((wr_axy_p AND i(2) AND NOT(i(1)) AND i(0)) = '1')
-  BEGIN
-    n_x_p(5) <= GUARDED n_x_p(4);
-  END BLOCK LABEL15;
-  LABEL16 : BLOCK ((wr_axy_p AND i(2) AND NOT(i(1)) AND NOT(i(0))) = '1')
-  BEGIN
-    n_x_p(4) <= GUARDED n_x_p(3);
-  END BLOCK LABEL16;
-  LABEL17 : BLOCK ((wr_axy_p AND NOT(i(2)) AND i(1) AND i(0)) = '1')
-  BEGIN
-    n_x_p(3) <= GUARDED n_x_p(2);
-  END BLOCK LABEL17;
-  LABEL18 : BLOCK ((wr_axy_p AND NOT(i(2)) AND i(1) AND NOT(i(0))) = '1')
-  BEGIN
-    n_x_p(2) <= GUARDED n_x_p(1);
-  END BLOCK LABEL18;
-  LABEL19 : BLOCK ((wr_axy_p AND NOT(i(2)) AND NOT(i(1)) AND i(0)) = '1')
-  BEGIN
-    n_x_p(1) <= GUARDED n_x_p(0);
-  END BLOCK LABEL19;
-  LABEL20 : BLOCK ((wr_axy_p AND NOT(i(2)) AND NOT(i(1)) AND NOT(i(0))) = '1')
-  BEGIN
-    n_x_p(0) <= GUARDED x;
-  END BLOCK LABEL20;
-  LABEL21 : BLOCK ((wr_axy_p AND i(2) AND i(1) AND i(0)) = '1')
-  BEGIN
-    n_a_p(7) <= GUARDED a;
-  END BLOCK LABEL21;
-  LABEL22 : BLOCK ((wr_axy_p AND i(2) AND i(1) AND NOT(i(0))) = '1')
-  BEGIN
-    n_a_p(6) <= GUARDED n_a_p(5);
-  END BLOCK LABEL22;
-  LABEL23 : BLOCK ((wr_axy_p AND i(2) AND NOT(i(1)) AND i(0)) = '1')
-  BEGIN
-    n_a_p(5) <= GUARDED n_a_p(4);
-  END BLOCK LABEL23;
-  LABEL24 : BLOCK ((wr_axy_p AND i(2) AND NOT(i(1)) AND NOT(i(0))) = '1')
-  BEGIN
-    n_a_p(4) <= GUARDED n_a_p(3);
-  END BLOCK LABEL24;
-  LABEL25 : BLOCK ((wr_axy_p AND NOT(i(2)) AND i(1) AND i(0)) = '1')
-  BEGIN
-    n_a_p(3) <= GUARDED n_a_p(2);
-  END BLOCK LABEL25;
-  LABEL26 : BLOCK ((wr_axy_p AND NOT(i(2)) AND i(1) AND NOT(i(0))) = '1')
-  BEGIN
-    n_a_p(2) <= GUARDED n_a_p(1);
-  END BLOCK LABEL26;
-  LABEL27 : BLOCK ((wr_axy_p AND NOT(i(2)) AND NOT(i(1)) AND i(0)) = '1')
-  BEGIN
-    n_a_p(1) <= GUARDED n_a_p(0);
-  END BLOCK LABEL27;
-  LABEL28 : BLOCK ((wr_axy_p AND NOT(i(2)) AND NOT(i(1)) AND NOT(i(0))) = '1')
-  BEGIN
-    n_a_p(0) <= GUARDED a;
-  END BLOCK LABEL28;
+  update_counter_def_5 <= ((nreset = '1') OR NOT(wr_axy_p));
 END VBE;
