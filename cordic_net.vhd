@@ -3,15 +3,15 @@ PORT(
     ck          : IN  std_logic;
     raz         : IN  std_logic;
 
-    wr_axy_p    : IN  std_logic;
+    rd_nxy_p_21    : IN  std_logic;
     a           : IN std_logic;  -- Serial input for a
     x           : IN std_logic;  -- Serial input for x
     y           : IN std_logic;  -- Serial input for y
     wok_axy_p   : OUT std_logic;
 
     rd_nxy_p    : IN  std_logic;
-    nx_p        : OUT std_logic_vector(7 DOWNTO 0);
-    ny_p        : OUT std_logic_vector(7 DOWNTO 0);
+    data_x        : OUT std_logic_vector(7 DOWNTO 0);
+    data_x        : OUT std_logic_vector(7 DOWNTO 0);
     rok_nxy_p   : OUT std_logic
 );
 END cordic_net;
