@@ -1,7 +1,7 @@
 entity cordic_serial is 
 port(
     ck     : in std_logic; 
-    nreset : in std_logic;
+    raz : in std_logic;
 
     nx_p    : in std_logic_vector(7 downto 0);
     ny_p    : in std_logic_vector(7 downto 0); 
@@ -28,7 +28,7 @@ begin
 FSM : process(ck)
 begin 
 if ((ck = '1') AND NOT(ck'STABLE) ) then 
-    if(nreset = '1') then 
+    if(raz = '0') then 
     wait0 <= '1';
     send <= '0'; 
     else
