@@ -16,7 +16,7 @@ entity cordic_par is
     ARCHITECTURE vhd OF cordic_par IS 
     
 
-        SIGNAL i, n_i : std_logic_vector(2 downto 0);
+        SIGNAL i, n_i : std_logic_vector(3 downto 0);
         SIGNAL n_a_p, n_x_p, n_y_p, tmp_a_p, tmp_x_p, tmp_y_p: std_logic_vector(7 downto 0);  
         signal n_wok_axy_p : std_logic;
       
@@ -28,12 +28,13 @@ entity cordic_par is
     update_counter: process(ck)
     begin 
     if ((ck = '1') AND NOT(ck'STABLE) ) then 
-        if(nreset = '1' or not(wr_axy_p)) then 
-            i <= "000";
+        if(nreset = '1' ) then 
+            i <= "0000";
             tmp_a_p <= (others => '0');
             tmp_x_p <= (others => '0');
             tmp_y_p <= (others => '0');
-            
+            wok_axy_p <= '0';
+
         else
             tmp_a_p<= n_a_p;
             tmp_x_p<= n_x_p;
@@ -44,16 +45,16 @@ entity cordic_par is
     end if;
     end process update_counter; 
     
-    n_i <= i + 1 when wr_axy_p else "000";
-    n_wok_axy_p <= '1'   when   n_i = "111" else '0';
+    n_i <= i + 1 when wr_axy_p or wok_axy_p else "0000";
+    n_wok_axy_p <= '1'   when   i = "0111" else '0';
 
-    n_a_p<= tmp_a_p(6 downto 0) & a when i <= "111" else tmp_a_p;
-    n_x_p<= tmp_x_p(6 downto 0) & x when i <= "111" else tmp_x_p;
-    n_y_p<= tmp_y_p(6 downto 0) & y when i <= "111" else tmp_y_p;
+    n_a_p<= tmp_a_p(6 downto 0) & a when i <= "0111" else tmp_a_p;
+    n_x_p<= tmp_x_p(6 downto 0) & x when i <= "0111" else tmp_x_p;
+    n_y_p<= tmp_y_p(6 downto 0) & y when i <= "0111" else tmp_y_p;
 
-    a_p         <= tmp_a_p ;
-    x_p         <= tmp_x_p ;
-    y_p         <= tmp_y_p ;
+    a_p         <= tmp_a_p when  i="1000" else "00000000" ;
+    x_p         <= tmp_x_p  when i="1000" else "00000000" ;
+    y_p         <= tmp_y_p  when i="1000" else "00000000" ;
 
     
     END vhd;
