@@ -1,18 +1,18 @@
-0ENTITY cordic_net IS
+ENTITY cordic_net IS
 PORT(
     ck          : IN  std_logic;
     raz         : IN  std_logic;
 
-    rd_nxy_p_21    : IN  std_logic;
-    a           : IN std_logic;  -- Serial input for a
-    x           : IN std_logic;  -- Serial input for x
-    y           : IN std_logic;  -- Serial input for y
-    wok_axy_p   : OUT std_logic;
+    rok_arg     : IN  std_logic;
+    wok_res     : IN  std_logic;
 
-    rd_nxy_p    : IN  std_logic;
-    data_x        : OUT std_logic_vector(7 DOWNTO 0);
-    data_x        : OUT std_logic_vector(7 DOWNTO 0);
-    rok_nxy_p   : OUT std_logic
+    arg0         : IN std_logic_vector(7 downto 0);  
+               
+    rd_arg      : OUT std_logic;
+    wr_res      : OUT std_logic;
+    
+    res         : OUT std_logic_vector(7 DOWNTO 0)
+    
 );
 END cordic_net;
 
@@ -20,23 +20,34 @@ ARCHITECTURE vhd OF cordic_net IS
 
     SIGNAL mkc  : std_logic_vector(1 downto 0); -- multiply KC
     SIGNAL cmd  : std_logic_vector(2 downto 0); -- command algo
-    SIGNAL i    : std_logic_vector(2 downto 0); -- compteur de recherche dichotomique
-    SIGNAL rd_axy_12, rd_nxy_p_21, wr_axy_p_23, rd_nxy_p_32  : std_logic; --wok of cordic_par become wr of cordic_ctl
-    SIGNAL a_p_v, x_p_v, y_p_v: std_logic_vector(7 downto 0); -- the parallel vector comming from _par
+    SIGNAL i    : std_logic_vector(2 downto 0); -- dichotomous search counter
+    
+    SIGNAL rd_to_tto   : std_logic;  -- Control signal for write from cordic_ctl to two_to_one
+    SIGNAL wr_to_ctl   : std_logic;  -- Control signal for write from one_to_three to cordic_ctl
+    SIGNAL wr_to_tto   : std_logic;  -- Write control signal for two_to_one component
+    SIGNAL rd_to_ctl   : std_logic;  -- Read control signal from two_to_one to cordic_ctl
 
-    COMPONENT cordic_par
+    SIGNAL a_p_v, x_p_v, y_p_v: std_logic_vector(7 downto 0); -- parallel vectors coming from _par
+    SIGNAL nx_p_v, ny_p_v : std_logic_vector(7 downto 0); -- result of CORDIC operation
+    
+
+
+    COMPONENT one_to_three
     PORT(
-        ck          : IN  std_logic;
-        raz         : IN  std_logic;
-        
-        a           : IN std_logic;  -- Serial input for a
-        x           : IN std_logic;  -- Serial input for x
-        y           : IN std_logic;  -- Serial input for y
-        rok_axy_p   : IN  std_logic; -- Write pulse to load serial data
-        rd_axy_p    : OUT std_logic; -- Done signal when process is complete
-        a_p         : OUT  std_logic_vector(7 DOWNTO 0); -- Parallel output for a
-        x_p         : OUT  std_logic_vector(7 DOWNTO 0); -- Parallel output for x
-        y_p         : OUT  std_logic_vector(7 DOWNTO 0)  -- Parallel output for y
+        ck     : in std_logic; 
+        raz    : in std_logic;
+    
+        data_in : in std_logic_vector(7 downto 0);
+    
+        x_p    : out std_logic_vector(7 downto 0);
+        y_p    : out std_logic_vector(7 downto 0); 
+        a_p    : out std_logic_vector(7 downto 0); 
+    
+        rok_nxy_p        : in std_logic; 
+        rd_nxy_p         : out std_logic;
+    
+        wok_axy_p        : in std_logic;
+        wr_axy_p         : out std_logic
     );
     END COMPONENT;
 
@@ -74,52 +85,52 @@ ARCHITECTURE vhd OF cordic_net IS
     );
     END COMPONENT;
 
-    COMPONENT cordic_serial
+    COMPONENT two_to_one
     PORT(
-        ck          : in std_logic; 
-        raz         : in std_logic;
+        ck     : in std_logic; 
+        raz    : in std_logic;
     
-        nx_p        : in std_logic_vector(7 downto 0);
-        ny_p        : in std_logic_vector(7 downto 0); 
+        nx_p    : in std_logic_vector(7 downto 0);
+        ny_p    : in std_logic_vector(7 downto 0); 
     
-        rok_nxy_p   : in std_logic; 
+        rok_nxy_p        : in std_logic; 
+        rd_nxy_p         : out std_logic;
     
-        rd_nxy_p    : out std_logic;
-        data_x      : out std_logic; 
-        data_y      : out std_logic   
+        wok_axy_p        : in std_logic;
+        wr_axy_p         : out std_logic;
+    
+        data_out           : out std_logic_vector(7 downto 0) 
     );
     END COMPONENT;
 
 BEGIN
 
-    par : cordic_par 
+    par : one_to_three
     PORT MAP (
-        ck          => ck         ,
-        raz         => raz        ,
-                    
-        a           => a          ,
-        x           => x          ,
-        y           => y          ,
-                    
-        rok_axy_p   => rd_nxy_p_21 , -- comming from _ctl
-        rd_axy_p   => rd_axy_12    , --going to _ctl
-                    
-        a_p         => a_p_v      , --going to _ctl
-        x_p         => x_p_v      , --going to _dp
-        y_p         => y_p_v        --going to _dp
-    );
+        ck          => ck,
+        raz         => raz,
+        data_in     => arg0,  -- Data input for one_to_three
+        x_p         => x_p_v, -- Resulting x from parallel processing
+        y_p         => y_p_v, -- Resulting y from parallel processing
+        a_p         => a_p_v, -- Resulting a from parallel processing
+        rok_nxy_p   => rok_arg, -- Control signal for rd from cordic_ctl
+        rd_nxy_p    => rd_arg, -- Control signal to cordic_ctl
+
+        wok_axy_p   => rd_to_tto, -- Write Okay control for cordic_ctl
+        wr_axy_p    => wr_to_ctl  -- Write control to cordic_ctl
+        );
 
     ctl : cordic_ctl 
     PORT MAP (
         ck          => ck         ,
         raz         => raz        ,
                        
-        wr_axy_p    => wr_axy_p_23 , -- going to _serial 
-        a_p         => a_p_v      , -- coming from _par
-        wok_axy_p   => rd_nxy_p_32 , -- comming from _serial
+        wr_axy_p    => wr_to_tto , -- going to _serial 
+        a_p         => a_p_v      ,   -- coming from three to one
+        wok_axy_p   => rd_to_ctl , -- comming from _serial
                        
-        rd_nxy_p    => rd_nxy_p_21, -- going to _par
-        rok_nxy_p   => rd_axy_12  , -- comming from _par
+        rd_nxy_p    => rd_to_tto, 
+        rok_nxy_p   => wr_to_ctl  , 
                        
         mkc_p       => mkc        ,  --going to _dp
         cmd_p       => cmd        ,  --going to _dp
@@ -141,19 +152,21 @@ BEGIN
         i_p         => i            --comming from_ctl
     );
 
-    serial : cordic_serial 
+    serial : two_to_one 
     PORT MAP (
-        ck          => ck         ,
-        raz         => raz        ,
-                       
-        nx_p        => nx_p_v     , -- comming from _dp
-        ny_p        => ny_p_v     , -- comming from _dp
+        ck          => ck,
+        raz         => raz,
 
-        rok_nxy_p   => wr_axy_p_23 , -- comming from _ctl                     
-        rd_nxy_p    => rd_nxy_p_32 , -- going to _ctl
+        nx_p        => nx_p_v,      
+        ny_p        => ny_p_v,    
 
-        data_x      => data_x     ,                  
-        data_y      => data_y 
+        rok_nxy_p   => wr_to_tto, 
+        rd_nxy_p    => rd_to_ctl, 
+        wok_axy_p   => wok_res, 
+
+        wr_axy_p    => wr_res,      
+        data_out    => res          
+
     );
 
 END vhd;
