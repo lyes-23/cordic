@@ -27,9 +27,6 @@ ARCHITECTURE vhd OF one_to_three IS
 begin 
 
     
-    n_wait0 <= (wait0 and  not rok_nxy_p) or (send and wok_axy_p);
-    n_read0 <= ( read0 AND not comp )  OR    (wait0 AND rok_nxy_p );
-    n_send  <=  (send and not wok_axy_p )   or (read0 and comp );
 
 
 FSM : process(ck)
@@ -39,11 +36,14 @@ if ((ck = '1') AND NOT(ck'STABLE) ) then
     wait0 <= '1';
     send <= '0'; 
     read0 <= '0';
+    temp_x <=  "00000000";
+    temp_y <=  "00000000";
+    temp_a <=  "00000000";
     else
-    wait0 <= n_wait0;
-    send <= n_send; 
-    read0 <= n_read0;
-    temp_x <= n_temp_x;
+    wait0 <= (wait0 and not rok_nxy_p) or (send and wok_axy_p);
+    send  <= (send and not wok_axy_p) or (read0 and comp);
+    read0 <= (read0 AND not comp) or (wait0 AND rok_nxy_p);
+    temp_x <=  n_temp_x;
     temp_y <=  n_temp_y;
     temp_a <=  n_temp_a;
     end if;
@@ -56,24 +56,25 @@ wr_axy_p <= send;
 
 n_counter  <= "00"              when wait0 or send
               else counter + 1  when read0
-              else counter;
+              else "00";
 
-comp       <= 1 when counter = "10" else 0;
+comp       <= '1' when counter = "10" else '0';
 
 update_counter: process(ck)
 begin 
 if ((ck = '1') AND NOT(ck'STABLE) ) then 
     counter <= n_counter;
+   
 end if; 
 end process update_counter; 
  
- n_temp_x <= data_in when counter = "00" else temp_x;
- n_temp_y <= data_in when counter = "01" else temp_x;
- n_temp_a <= data_in when counter = "10" else temp_x;
+ n_temp_x <= data_in when counter = "00" and rok_nxy_p else temp_x;
+ n_temp_y <= data_in when counter = "01" and rok_nxy_p else temp_y;
+ n_temp_a <= data_in when counter = "10" and rok_nxy_p else temp_a;
 
- x_p <= temp_x;
- y_p <= temp_y;
- a_p <= temp_a;
+ x_p <= temp_x when send else "00000000";
+ y_p <= temp_y when send else "00000000";
+ a_p <= temp_a when send else "00000000";
 
 
 

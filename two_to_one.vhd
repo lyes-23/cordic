@@ -45,8 +45,8 @@ rd_nxy_p <= wait0;
 wr_axy_p <= send;
 
 
-n_counter  <= "0"              when wait0
-              else counter + 1  when send
+n_counter  <= "0"              when wait0 
+              else counter + 1  when send 
               else counter;
 
 update_counter: process(ck)
@@ -58,8 +58,8 @@ end process update_counter;
 
 
 
-data_out <= nx_p when  not counter else 
-            ny_p when counter      else
+data_out <= nx_p when  counter = '0' and wr_axy_p   else 
+            ny_p when  counter       and wr_axy_p     else
             x"00";
 
 
