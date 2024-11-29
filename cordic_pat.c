@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 #include "genpat.h"
 #include "alloca.h"
 #include "mut.h"
+
 
 // Constante g�n�rales
 const PERIOD=2;
@@ -30,7 +32,7 @@ const PERIOD=2;
 // inttostrx(0x42,8)    rend "0x00000042"
 //--------------------------------------------------------------------------------------------------
 static inline char *inttostr(int entier)
-{name
+{
     char *str = (char *) alloca(32 * sizeof(char)); // allocation dans la pile
     sprintf(str, "%d", entier);
     return namealloc(str);  // utilise un dictionnaire

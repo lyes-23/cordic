@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
     unsigned valrange = twopow(valwd) - 1;
     unsigned valuenb = twopow(addrwd) / 5;
 
-    char *name = "cordic";
+    char *name = "value";
     unsigned namelen = strlen(name);
     unsigned rangelen = 1 + (valwd - 1) / 4;
 
