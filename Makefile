@@ -83,7 +83,11 @@ valid_cordic: ##genpat $(MODEL)_pat
 
 clean:
 	rm  Makefile.*\
+		two_to_one.vbe\
+		one_to_three.vbe\
+		$(MODEL)_dp.vbe\
 		$(MODEL)_net.vbe\
+		$(MODEL)_ctl.vbe\
 		$(MODEL)_data.vbe\
 		$(MODEL)_data.vhd\
 		$(MODEL)_tb.vst\
