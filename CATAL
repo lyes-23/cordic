@@ -1,2 +1,6 @@
 cordic_dp C
 cordic_ctl C
+cordic_data C
+one_to_three C 
+two_to_one C 
+cordic_tb_model C

@@ -8,12 +8,12 @@ CYCLES  = 4000#		number of cycles to simulate (should be suffisant for all tripl
 VALNB   = $(shell awk -v ADDRWD=$(ADDRWD) 'BEGIN{print int((2**ADDRWD)/3) }')
 LASTPT  = $(shell awk -v VALNB=$(VALNB) 'BEGIN{print 3*VALNB-1}')
 
-ALLIANCE=/users/outil/alliance/alliance/Linux.el7_64/install
+ALLIANCE=/home/skaikru/alliance/install
 CMOS = $(ALLIANCE)/etc/cmos.rds
 SLIB = $(ALLIANCE)/cells/sxlib
 PLIB = $(ALLIANCE)/cells/pxlib
 
-
+ASIM = export MBK_WORK_LIB=.; MBK_CATA_LIB=$(SLIB); asimut
 BOOM = export MBK_WORK_LIB=.; boom
 BOOG = export MBK_WORK_LIB=. MBK_TARGET_LIB=$(SLIB); MBK_OUT_LO=vst; boog
 XSCH = export MBK_WORK_LIB=. MBK_CATA_LIB=$(SLIB); xsch
@@ -74,14 +74,13 @@ valid_cordic: ##genpat $(MODEL)_pat
 	vasy -a -I vhd -p -o two_to_one   two_to_one
 	vasy -a -I vhd -p -o $(MODEL)_ctl $(MODEL)_ctl
 	vasy -a -I vhd -p -o $(MODEL)_dp $(MODEL)_dp
-	vasy -a -I vhd -p -o $(MODEL)_data $(MODEL)_data
-	vasy -a -I vhd -p -o $(MODEL)_net $(MODEL)_net
+	vasy -a -I vhd -p -o $(MODEL)_data $(MODEL)_data 
 	vasy -a -I vhd -p -o $(MODEL)_tb   $(MODEL)_tb  
 	asimut	$(MODEL)_tb $(MODEL)_tb $(MODEL)_tbres |\
 	awk '/pattern/{printf("->"$$3" "$$4"\r")}END{print}'
 	@grep ": ?1" $(MODEL)_tbres.pat || echo "Lucky no error"
 
-clean:
+clean: ##		$(MODEL)_tb.pat
 	rm  Makefile.*\
 		two_to_one.vbe\
 		one_to_three.vbe\
@@ -91,8 +90,9 @@ clean:
 		$(MODEL)_data.vbe\
 		$(MODEL)_data.vhd\
 		$(MODEL)_tb.vst\
-		$(MODEL)_tb.pat\
+		
 		$(MODEL)_tbres.pat\
+		*.vst\
 		default.pat\
 		rom rom.txt\
 		2> /dev/null || true
