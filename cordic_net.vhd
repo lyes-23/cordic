@@ -113,11 +113,11 @@ BEGIN
         x_p         => x_p_v, -- Resulting x from parallel processing
         y_p         => y_p_v, -- Resulting y from parallel processing
         a_p         => a_p_v, -- Resulting a from parallel processing
-        rok_nxy_p   => rok_arg, -- Control signal for rd from cordic_ctl
-        rd_nxy_p    => rd_arg, -- Control signal to cordic_ctl
+        rok_nxy_p   => rok_arg, -- Control signal for rd from cordic_ctl in
+        rd_nxy_p    => rd_arg, -- Control signal to cordic_ctl      out
 
-        wok_axy_p   => rd_to_tto, -- Write Okay control for cordic_ctl
-        wr_axy_p    => wr_to_ctl  -- Write control to cordic_ctl
+        wok_axy_p   => wr_to_ctl, -- Write Okay control for cordic_ctl in
+        wr_axy_p    => rd_to_tto -- Write control to cordic_ctl out 
         );
 
     ctl : cordic_ctl 
@@ -125,12 +125,12 @@ BEGIN
         ck          => ck         ,
         raz         => raz        ,
                        
-        wr_axy_p    => wr_to_tto , -- going to _serial 
+        wr_axy_p    =>  rd_to_ctl, -- going to _serial    in
         a_p         => a_p_v      ,   -- coming from three to one
-        wok_axy_p   => rd_to_ctl , -- comming from _serial
+        wok_axy_p   =>  wr_to_tto, -- comming from _serial out 
                        
-        rd_nxy_p    => rd_to_tto, 
-        rok_nxy_p   => wr_to_ctl  , 
+        rd_nxy_p    => rd_to_tto,   --in  
+        rok_nxy_p   => wr_to_ctl  ,  -- out
                        
         mkc_p       => mkc        ,  --going to _dp
         cmd_p       => cmd        ,  --going to _dp
@@ -154,14 +154,14 @@ BEGIN
 
     serial : two_to_one 
     PORT MAP (
-        ck          => ck,
+        ck          => ck,  
         raz         => raz,
 
         nx_p        => nx_p_v,      
         ny_p        => ny_p_v,    
 
-        rok_nxy_p   => wr_to_tto, 
-        rd_nxy_p    => rd_to_ctl, 
+        rok_nxy_p   => wr_to_tto,   --in
+        rd_nxy_p    => rd_to_ctl, --out
         wok_axy_p   => wok_res, 
 
         wr_axy_p    => wr_res,      

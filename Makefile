@@ -58,26 +58,28 @@ simul_gpat_par: vasy ## Simule un jeu de patterns générés
 	$(ASIM) -b $(MODEL)_v $(MODEL)_gen $(MODEL)_gres
 	@if [[ "$(VERBOSE)" == "1" ]]; then $(XPAT) -l $(MODEL)_gres; fi
 
-valid_cordic: ##genpat $(MODEL)_pat
+valid_cordic: ##
 	$(CC) $(CFLAGS) rom.c -o rom
 	./rom	$(ADDRWD) $(VALWD) > rom.txt
 	export PATNAME=$(MODEL)_tb ADDRWD=$(ADDRWD) VALWD=$(VALWD) CYCLES=$(CYCLES);\
-	
+	genpat $(MODEL)_pat
 	gcc -w -E -DADDRWD=$(ADDRWD) -DVALWD=$(VALWD) -DLASTPT=$(LASTPT) $(MODEL)_data.vhd.c\
 	| grep -v "^#" > $(MODEL)_data.vhd
 	vasy -a -I vhd -p -o one_to_three one_to_three
 	vasy -a -I vhd -p -o two_to_one   two_to_one
 	vasy -a -I vhd -p -o $(MODEL)_ctl $(MODEL)_ctl
 	vasy -a -I vhd -p -o $(MODEL)_dp $(MODEL)_dp
+	vasy -a -I vhd -p -o $(MODEL)_net $(MODEL)_net
 	vasy -a -I vhd -p -o $(MODEL)_data $(MODEL)_data 
 	vasy -a -I vhd -p -o $(MODEL)_tb   $(MODEL)_tb  
-	asimut	$(MODEL)_tb $(MODEL)_tb $(MODEL)_tbres |\
+	$(ASIM)	$(MODEL)_tb $(MODEL)_tb $(MODEL)_tbres |\
 	awk '/pattern/{printf("->"$$3" "$$4"\r")}END{print}'
 	@grep ": ?1" $(MODEL)_tbres.pat || echo "Lucky no error"
 
 clean: ##		$(MODEL)_tb.pat
 	rm  Makefile.*\
 		$(MODEL)_cor.vbe\
+		$(MODEL)_cor_res_pat\
 		$(MODEL)_net.vbe\
 		$(MODEL)_net.vst\
 		$(MODEL)_ctl.vbe\
@@ -88,6 +90,8 @@ clean: ##		$(MODEL)_tb.pat
 		two_to_one.vbe\
 		$(MODEL)_tb.vst\
 		$(MODEL)_tb.pat\
+		$(MODEL)_tbres.pat\
+		$(MODEL)_tb_model.vbe\
 		default.pat\
 		rom rom.txt\
 		2> /dev/null || true
